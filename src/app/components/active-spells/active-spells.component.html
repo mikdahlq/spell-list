@@ -1,0 +1,33 @@
+<div class="active-spells-container">
+  <div class="header">
+    <h2>Active Spells</h2>
+    <div class="button-group">
+      <button class="decrease-button" (click)="decreaseDuration()" [disabled]="activeSpells.length === 0">
+        Decrease Duration
+      </button>
+      <button class="clear-button" (click)="clearAllSpells()" [disabled]="activeSpells.length === 0">
+        Clear All
+      </button>
+    </div>
+  </div>
+
+  @if (activeSpells.length > 0) {
+    <div class="spells-grid">
+      @for (spell of activeSpells; track spell.name) {
+        <div class="spell-card">
+          <h3>{{spell.name}}</h3>
+          <div class="spell-info">
+            <p class="description">{{spell.description}}</p>
+            <p class="school">School: {{spell.school}}</p>
+            <p class="level">Level: {{spell.level}}</p>
+            <p class="duration">Duration: {{spell.duration}}</p>
+          </div>
+        </div>
+      }
+    </div>
+  } @else {
+    <div class="no-spells">
+      No active spells. Cast some spells from the Spell Library!
+    </div>
+  }
+</div> 

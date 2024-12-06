@@ -1,0 +1,73 @@
+<div class="create-spell-container">
+  @if (successMessage) {
+    <div class="success-message">
+      {{ successMessage }}
+    </div>
+  }
+
+  <form [formGroup]="spellForm" (ngSubmit)="onSubmit()" class="spell-form">
+    <h2>Create New Spell</h2>
+    
+    <div class="form-group">
+      <label for="name">Name:</label>
+      <input id="name" type="text" formControlName="name">
+      @if (spellForm.get('name')?.errors?.['required'] && spellForm.get('name')?.touched) {
+        <div class="error">
+          Name is required
+        </div>
+      }
+    </div>
+
+    <div class="form-group">
+      <label for="description">Description:</label>
+      <textarea id="description" formControlName="description" rows="3"></textarea>
+      @if (spellForm.get('description')?.errors?.['required'] && spellForm.get('description')?.touched) {
+        <div class="error">
+          Description is required
+        </div>
+      }
+    </div>
+
+    <div class="form-group">
+      <label for="school">School of Magic:</label>
+      <select id="school" formControlName="school">
+        <option value="">Select a school</option>
+        <option value="Abjuration">Abjuration</option>
+        <option value="Conjuration">Conjuration</option>
+        <option value="Divination">Divination</option>
+        <option value="Enchantment">Enchantment</option>
+        <option value="Evocation">Evocation</option>
+        <option value="Illusion">Illusion</option>
+        <option value="Necromancy">Necromancy</option>
+        <option value="Transmutation">Transmutation</option>
+      </select>
+      @if (spellForm.get('school')?.errors?.['required'] && spellForm.get('school')?.touched) {
+        <div class="error">
+          School is required
+        </div>
+      }
+    </div>
+
+    <div class="form-group">
+      <label for="level">Level:</label>
+      <input id="level" type="number" formControlName="level" min="0">
+      @if (spellForm.get('level')?.errors?.['required'] && spellForm.get('level')?.touched) {
+        <div class="error">
+          Level is required
+        </div>
+      }
+    </div>
+
+    <div class="form-group">
+      <label for="duration">Duration:</label>
+      <input id="duration" type="number" formControlName="duration" min="0">
+      @if (spellForm.get('duration')?.errors?.['required'] && spellForm.get('duration')?.touched) {
+        <div class="error">
+          Duration is required
+        </div>
+      }
+    </div>
+
+    <button type="submit" [disabled]="!spellForm.valid">Create Spell</button>
+  </form>
+</div> 

@@ -1,0 +1,42 @@
+<div class="spell-list-container">
+  <h2>Spell Library</h2>
+  
+  @if (successMessage) {
+    <div class="success-message">
+      {{ successMessage }}
+    </div>
+  }
+  
+  <table class="spell-table">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Description</th>
+        <th>Level</th>
+        <th>School</th>
+        <th>Duration</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (spell of spells; track spell.name) {
+        <tr>
+          <td>{{spell.name}}</td>
+          <td>{{spell.description}}</td>
+          <td>{{spell.level}}</td>
+          <td>{{spell.school}}</td>
+          <td>{{spell.duration}}</td>
+          <td>
+            <button (click)="castSpell(spell)" class="cast-button">Cast Spell</button>
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+
+  @if (spells.length === 0) {
+    <div class="no-spells">
+      No spells found. Create some spells to see them here!
+    </div>
+  }
+</div> 
