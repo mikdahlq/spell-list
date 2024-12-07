@@ -2,6 +2,8 @@ import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Spell } from '../../models/spell.interface';
+import { getFirestore, collection, addDoc } from 'firebase/firestore';
+import { getAuth } from 'firebase/auth';
 
 @Component({
   selector: 'app-create-spell',
@@ -13,6 +15,8 @@ import { Spell } from '../../models/spell.interface';
 export class CreateSpellComponent {
   spellForm: FormGroup;
   successMessage: string = '';
+  private db = getFirestore();
+  private auth = getAuth();
 
   constructor(private fb: FormBuilder, private router: Router) {
     this.spellForm = this.fb.group({
@@ -24,31 +28,32 @@ export class CreateSpellComponent {
     });
   }
 
-  onSubmit() {
-    if (this.spellForm.valid) {
-      const spell: Spell = this.spellForm.value;
-      
-      // Get existing spells from localStorage
-      const existingSpells = localStorage.getItem('spells');
-      const spells: Spell[] = existingSpells ? JSON.parse(existingSpells) : [];
-      
-      // Add new spell
-      spells.push(spell);
-      
-      // Save back to localStorage
-      localStorage.setItem('spells', JSON.stringify(spells));
-      
-      // Show success message and reset form
-      this.successMessage = 'Spell created successfully!';
-      this.spellForm.reset({
-        level: 0,
-        duration: 0
-      });
-      
-      // Navigate to spell list after a short delay
-      setTimeout(() => {
-        this.router.navigate(['/list-spells']);
-      }, 1500);
+  async onSubmit() {
+    if (this.spellForm.valid && this.auth.currentUser) {
+      try {
+        const spell: Spell = {
+          ...this.spellForm.value,
+          userId: this.auth.currentUser.uid,
+          createdAt: new Date()
+        };
+        
+        // Add spell to Firestore
+        await addDoc(collection(this.db, 'spells'), spell);
+        
+        // Show success message and reset form
+        this.successMessage = 'Spell created successfully!';
+        this.spellForm.reset({
+          level: 0,
+          duration: 0
+        });
+        
+        // Navigate to spell list after a short delay
+        setTimeout(() => {
+          this.router.navigate(['/list-spells']);
+        }, 1500);
+      } catch (error) {
+        console.error('Error creating spell:', error);
+      }
     }
   }
 } 

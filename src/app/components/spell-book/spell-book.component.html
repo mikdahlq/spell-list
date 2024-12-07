@@ -1,0 +1,19 @@
+<div class="spell-book-container">
+  <h2>Your Spell Books</h2>
+  <ul>
+    @for (spellBook of spellBooks; track spellBook.id) {
+      <li>
+        <h3>{{ spellBook.name }}</h3>
+        <p>{{ spellBook.description }}</p>
+        <ul>
+          @for (spell of spells[spellBook.id!]; track spell.id) {
+            <li>
+              <span>{{ spell.name }}</span>
+              <button (click)="castSpell(spell)">Cast Spell</button>
+            </li>
+          }
+        </ul>
+      </li>
+    }
+  </ul>
+</div>

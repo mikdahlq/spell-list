@@ -1,6 +1,17 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Spell } from '../../models/spell.interface';
+import { 
+  getFirestore, 
+  collection, 
+  query, 
+  where, 
+  getDocs, 
+  deleteDoc,
+  doc,
+  writeBatch
+} from 'firebase/firestore';
+import { getAuth } from 'firebase/auth';
 
 @Component({
   selector: 'app-active-spells',
@@ -10,35 +21,70 @@ import { Spell } from '../../models/spell.interface';
   imports: [CommonModule]
 })
 export class ActiveSpellsComponent implements OnInit {
-  activeSpells: Spell[] = [];
+  activeSpells: (Spell & { id: string })[] = [];
+  private db = getFirestore();
+  private auth = getAuth();
 
   ngOnInit(): void {
     this.loadActiveSpells();
   }
 
-  loadActiveSpells(): void {
-    const storedActiveSpells = localStorage.getItem('activeSpells');
-    this.activeSpells = storedActiveSpells ? JSON.parse(storedActiveSpells) : [];
-    // Filter out spells with no duration left
-    this.activeSpells = this.activeSpells.filter(spell => spell.duration > 0);
-    this.saveActiveSpells();
+  async loadActiveSpells(): Promise<void> {
+    if (!this.auth.currentUser) return;
+
+    try {
+      const activeSpellsRef = collection(this.db, 'activeSpells');
+      const q = query(activeSpellsRef, where('userId', '==', this.auth.currentUser.uid));
+      const querySnapshot = await getDocs(q);
+      
+      this.activeSpells = querySnapshot.docs
+        .map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        } as Spell & { id: string }))
+        .filter(spell => spell.duration > 0);
+    } catch (error) {
+      console.error('Error loading active spells:', error);
+    }
   }
 
-  decreaseDuration(): void {
-    this.activeSpells = this.activeSpells.map(spell => ({
-      ...spell,
-      duration: Math.max(0, spell.duration - 1)
-    })).filter(spell => spell.duration > 0);
-    
-    this.saveActiveSpells();
+  async decreaseDuration(): Promise<void> {
+    if (!this.auth.currentUser) return;
+
+    try {
+      const batch = writeBatch(this.db);
+
+      this.activeSpells.forEach(spell => {
+        const newDuration = Math.max(0, spell.duration - 1);
+        if (newDuration === 0) {
+          // Delete spells with no duration left
+          const spellRef = doc(this.db, 'activeSpells', spell.id);
+          batch.delete(spellRef);
+        }
+      });
+
+      await batch.commit();
+      await this.loadActiveSpells();
+    } catch (error) {
+      console.error('Error decreasing duration:', error);
+    }
   }
 
-  clearAllSpells(): void {
-    this.activeSpells = [];
-    this.saveActiveSpells();
-  }
+  async clearAllSpells(): Promise<void> {
+    if (!this.auth.currentUser) return;
 
-  private saveActiveSpells(): void {
-    localStorage.setItem('activeSpells', JSON.stringify(this.activeSpells));
+    try {
+      const batch = writeBatch(this.db);
+
+      this.activeSpells.forEach(spell => {
+        const spellRef = doc(this.db, 'activeSpells', spell.id);
+        batch.delete(spellRef);
+      });
+
+      await batch.commit();
+      this.activeSpells = [];
+    } catch (error) {
+      console.error('Error clearing spells:', error);
+    }
   }
 } 

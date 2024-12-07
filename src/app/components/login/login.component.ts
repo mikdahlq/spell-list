@@ -20,23 +20,11 @@ export class LoginComponent {
   isLoading = false;
   error: string | null = null;
 
-  // Firebase configuration
-  private firebaseConfig = {
-    apiKey: "AIzaSyC3idCCsPNwfJME8Nun6FpO7oHmSu7W7N4",
-    authDomain: "spell-list-b9e6d.firebaseapp.com",
-    projectId: "spell-list-b9e6d",
-    storageBucket: "spell-list-b9e6d.firebasestorage.app",
-    messagingSenderId: "212382812841",
-    appId: "1:212382812841:web:21c1861149e3955ae237b8"
-  };
-
   private auth: any;
   private provider: any;
 
   constructor(private router: Router) {
-    // Initialize Firebase
-    const app = initializeApp(this.firebaseConfig);
-    this.auth = getAuth(app);
+    this.auth = getAuth();
     this.provider = new GoogleAuthProvider();
 
     // Check if user is already logged in

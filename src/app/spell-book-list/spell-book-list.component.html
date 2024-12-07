@@ -1,0 +1,25 @@
+<div class="spell-book-list-container">
+  <h2>Your Spell Books</h2>
+
+  <!-- Form to create a new spell book -->
+  <div class="create-spell-book">
+    <h3>Create a New Spell Book</h3>
+    <form (submit)="createSpellBook(spellBookName.value, spellBookDescription.value); $event.preventDefault()">
+      <input type="text" #spellBookName placeholder="Spell Book Name" required />
+      <textarea #spellBookDescription placeholder="Description" required></textarea>
+      <button type="submit">Create Spell Book</button>
+    </form>
+  </div>
+
+  <!-- List of existing spell books -->
+  <ul>
+    @for (spellBook of spellBooks; track spellBook.id) {
+      <li>
+        <h3>{{ spellBook.name }}</h3>
+        <p>{{ spellBook.description }}</p>
+        <button (click)="castSpellFromBook(spellBook.id!)">Cast Spell</button>
+      </li>
+    }
+  </ul>
+</div>
+  
