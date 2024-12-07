@@ -1,0 +1,25 @@
+<div class="login-container">
+  <div class="login-card">
+    <h1>Welcome to Spell List</h1>
+    <p class="subtitle">Sign in to manage your spells</p>
+
+    @if (error) {
+      <div class="error-message">
+        {{ error }}
+      </div>
+    }
+
+    <button 
+      class="google-button" 
+      (click)="loginWithGoogle()" 
+      [disabled]="isLoading"
+    >
+      @if (isLoading) {
+        <span class="spinner"></span>
+      } @else {
+        <img src="assets/google-logo.svg" alt="Google logo" class="google-logo">
+      }
+      Sign in with Google
+    </button>
+  </div>
+</div> 
