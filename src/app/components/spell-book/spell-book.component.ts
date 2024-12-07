@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { SpellBook } from '../../models/spellbook.interface';
 import { Spell } from '../../models/spell.interface';
-import { getFirestore, collection, getDocs, addDoc } from 'firebase/firestore';
+import { getFirestore, collection, getDocs, addDoc, query, where } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 
 @Component({
@@ -24,7 +24,8 @@ export class SpellBookComponent implements OnInit {
 
     try {
       const spellBooksRef = collection(this.db, 'spellBooks');
-      const querySnapshot = await getDocs(spellBooksRef);
+      const q = query(spellBooksRef, where('userId', '==', this.auth.currentUser.uid));
+      const querySnapshot = await getDocs(q);
       
       this.spellBooks = querySnapshot.docs.map(doc => ({
         id: doc.id,
@@ -41,9 +42,12 @@ export class SpellBookComponent implements OnInit {
   }
 
   async loadSpellsForBook(spellBookId: string): Promise<void> {
+    if (!this.auth.currentUser) return;
+    
     try {
       const spellsRef = collection(this.db, 'spells');
-      const querySnapshot = await getDocs(spellsRef);
+      const q = query(spellsRef, where('userId', '==', this.auth.currentUser.uid));
+      const querySnapshot = await getDocs(q);
       
       this.spells[spellBookId] = querySnapshot.docs
         .filter(doc => this.spellBooks.find(book => book.id === spellBookId)?.spells.includes(doc.id))

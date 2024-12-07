@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { getFirestore, collection, getDocs, addDoc } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
-import { SpellBook } from '../models/spellbook.interface';
+import { SpellBook } from '../../models/spellbook.interface';
 
 @Component({
   selector: 'app-spell-book-list',
@@ -47,7 +47,7 @@ export class SpellBookListComponent implements OnInit {
       await addDoc(collection(this.db, 'spellBooks'), spellBook);
       this.loadSpellBooks(); // Refresh the list after creation
     } catch (error) {
-      console.error('Error creating spell book:', error);
+      console.error('Error creating spell book:', error); 
     }
   }
 
