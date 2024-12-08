@@ -1,8 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Input } from '@angular/core';
+import { SpellBookService } from '../../services/spellbook.service';
+import { SpellService } from '../../services/spell.service';
 import { SpellBook } from '../../models/spellbook.interface';
 import { Spell } from '../../models/spell.interface';
-import { getFirestore, collection, getDocs, addDoc, query, where } from 'firebase/firestore';
-import { getAuth } from 'firebase/auth';
 
 @Component({
   selector: 'app-spell-book',
@@ -10,68 +10,45 @@ import { getAuth } from 'firebase/auth';
   styleUrls: ['./spell-book.component.scss']
 })
 export class SpellBookComponent implements OnInit {
-  spellBooks: SpellBook[] = [];
-  spells: { [key: string]: Spell[] } = {}; // Map of spellBookId to spells
-  private db = getFirestore();
-  private auth = getAuth();
+  @Input() spellBook!: SpellBook;
+  spells: Spell[] = [];
+  allSpells: Spell[] = [];
+  selectedSpellIds: string[] = [];
+
+  constructor(private spellBookService: SpellBookService, private spellService: SpellService) {}
 
   ngOnInit(): void {
-    this.loadSpellBooks();
+    this.loadSpellsForBook(this.spellBook.id!);
+    this.loadAllSpells();
   }
 
-  async loadSpellBooks(): Promise<void> {
-    if (!this.auth.currentUser) return;
-
-    try {
-      const spellBooksRef = collection(this.db, 'spellBooks');
-      const q = query(spellBooksRef, where('userId', '==', this.auth.currentUser.uid));
-      const querySnapshot = await getDocs(q);
-      
-      this.spellBooks = querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      })) as SpellBook[];
-
-      // Load spells for each spell book
-      for (const spellBook of this.spellBooks) {
-        await this.loadSpellsForBook(spellBook.id!);
-      }
-    } catch (error) {
-      console.error('Error loading spell books:', error);
-    }
+  async loadAllSpells(): Promise<void> {
+    this.allSpells = await this.spellService.loadSpells();
   }
 
   async loadSpellsForBook(spellBookId: string): Promise<void> {
-    if (!this.auth.currentUser) return;
-    
-    try {
-      const spellsRef = collection(this.db, 'spells');
-      const q = query(spellsRef, where('userId', '==', this.auth.currentUser.uid));
-      const querySnapshot = await getDocs(q);
-      
-      this.spells[spellBookId] = querySnapshot.docs
-        .filter(doc => this.spellBooks.find(book => book.id === spellBookId)?.spells.includes(doc.id))
-        .map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        })) as Spell[];
-    } catch (error) {
-      console.error(`Error loading spells for book ${spellBookId}:`, error);
-    }
+    const allSpells = await this.spellService.loadSpells();
+    this.spells = allSpells.filter(spell => this.spellBook.spells.includes(spell.id!));
   }
 
   async castSpell(spell: Spell): Promise<void> {
-    if (!this.auth.currentUser) return;
+    await this.spellService.castSpell(spell);
+    console.log(`${spell.name} has been cast!`);
+  }
 
-    try {
-      await addDoc(collection(this.db, 'activeSpells'), {
-        ...spell,
-        userId: this.auth.currentUser.uid,
-        castAt: new Date()
-      });
-      console.log(`${spell.name} has been cast!`);
-    } catch (error) {
-      console.error('Error casting spell:', error);
+  toggleSpellSelection(spellId: string): void {
+    const index = this.selectedSpellIds.indexOf(spellId);
+    if (index > -1) {
+      this.selectedSpellIds.splice(index, 1);
+    } else {
+      this.selectedSpellIds.push(spellId);
     }
+  }
+
+  async addSpellsToBook(): Promise<void> {
+    this.spellBook.spells = [...new Set([...this.spellBook.spells, ...this.selectedSpellIds])];
+    await this.spellBookService.createSpellBook(this.spellBook.name, this.spellBook.description, this.spellBook.spells);
+    await this.loadSpellsForBook(this.spellBook.id!);
+    this.selectedSpellIds = []; // Clear selection after adding
   }
 }

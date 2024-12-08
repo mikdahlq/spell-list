@@ -14,11 +14,9 @@
   <!-- List of existing spell books -->
   <ul>
     @for (spellBook of spellBooks; track spellBook.id) {
-      <li>
-        <h3>{{ spellBook.name }}</h3>
-        <p>{{ spellBook.description }}</p>
-        <button (click)="castSpellFromBook(spellBook.id!)">Cast Spell</button>
-      </li>
+    <li>
+      <app-spell-book [spellBook]="spellBook"></app-spell-book>
+    </li>
     }
   </ul>
 </div>

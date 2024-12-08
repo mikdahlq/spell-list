@@ -1,19 +1,25 @@
 <div class="spell-book-container">
-  <h2>Your Spell Books</h2>
+  <h3>{{ spellBook.name }}</h3>
+  <p>{{ spellBook.description }}</p>
   <ul>
-    @for (spellBook of spellBooks; track spellBook.id) {
-      <li>
-        <h3>{{ spellBook.name }}</h3>
-        <p>{{ spellBook.description }}</p>
-        <ul>
-          @for (spell of spells[spellBook.id!]; track spell.id) {
-            <li>
-              <span>{{ spell.name }}</span>
-              <button (click)="castSpell(spell)">Cast Spell</button>
-            </li>
-          }
-        </ul>
-      </li>
+    @for (spell of spells; track spell.id) {
+    <li>
+      <span>{{ spell.name }}</span>
+      <button (click)="castSpell(spell)">Cast Spell</button>
+    </li>
     }
   </ul>
+  <div>
+    <h4>Add Spells to {{ spellBook.name }}</h4>
+    <ul>
+      @for (spell of allSpells; track spell.id) {
+      <li>
+        <input type="checkbox" [checked]="selectedSpellIds.includes(spell.id!)"
+          (change)="toggleSpellSelection(spell.id!)">
+        {{ spell.name }}
+      </li>
+      }
+    </ul>
+    <button (click)="addSpellsToBook()">Add Selected Spells</button>
+  </div>
 </div>
