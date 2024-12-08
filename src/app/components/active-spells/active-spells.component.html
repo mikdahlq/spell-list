@@ -12,18 +12,14 @@
   </div>
 
   @if (activeSpells.length > 0) {
-    <div class="spells-grid">
-      @for (spell of activeSpells; track spell.name) {
-        <div class="spell-card">
-          <h3>{{spell.name}}</h3>
-          <div class="spell-info">
-            <p class="description">{{spell.description}}</p>
-            <p class="school">School: {{spell.school}}</p>
-            <p class="level">Level: {{spell.level}}</p>
-            <p class="duration">Duration: {{spell.duration}}</p>
-          </div>
-        </div>
-      }
+    <div class="spell-card-container">
+      <div *ngFor="let spell of activeSpells" class="spell-card">
+        <h3>{{ spell.name }}</h3>
+        <p>{{ spell.description }}</p>
+        <p class="school">School: {{spell.school}}</p>
+        <p class="level">Level: {{spell.level}}</p>
+        <p class="duration">Duration: {{spell.duration}}</p>
+      </div>
     </div>
   } @else {
     <div class="no-spells">
